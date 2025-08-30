@@ -16,7 +16,6 @@ export class UserController {
   }
 
   async create(c: Context) {
-    console.log("create");
     try {
       const body = await c.req.json();
       const user = await this.userService.createUser(body);

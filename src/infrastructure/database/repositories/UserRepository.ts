@@ -4,6 +4,7 @@ import type { IUserRepository } from "../../../domain/repositories/iuser.reposit
 import { usersTable } from "../schema/users";
 import { injectable, inject } from "tsyringe";
 import type { Database } from "../schema";
+import { DATABASE_TOKEN } from "../connection";
 
 @injectable()
 export class UserRepository implements IUserRepository {

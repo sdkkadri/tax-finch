@@ -6,8 +6,8 @@ import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { container } from "tsyringe";
 import { DatabaseConnection } from "./infrastructure/database/connection";
-import routes from "./application/routes";
 import "./infrastructure/database/container";
+import routes from "./application/routes";
 
 // Export database types and schema for use throughout the application
 export { schema } from "./infrastructure/database/schema";
