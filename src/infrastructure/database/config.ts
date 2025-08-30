@@ -89,33 +89,35 @@ export function getDatabaseConnectionString(config: DatabaseConfig): string {
 }
 
 /**
- * Extracts connection pool configuration from the database configuration.
+ * Extracts connection pool configuration for the `pg.Pool` client.
  * 
  * This function provides a clean interface for accessing connection pool settings
- * that can be passed directly to database connection libraries. It returns an
- * object with min, max, and timeout values for connection pooling.
+ * that can be passed directly to the `pg` driver. It returns an object with
+ * `max`, `idleTimeoutMillis`, and `connectionTimeoutMillis` values which are the
+ * expected option names for `pg.Pool`.
  * 
  * @param {DatabaseConfig} config - The validated database configuration object
- * @returns {Object} Connection pool configuration with min, max, and timeout values
+ * @returns {Object} Connection pool configuration with `max`, `idleTimeoutMillis`, and `connectionTimeoutMillis`
  * 
  * @example
  * ```typescript
  * const config = loadDatabaseConfig();
  * const poolConfig = getConnectionPoolConfig(config);
- * // Returns: { min: 2, max: 10, timeout: 30000 }
+ * // Returns: { max: 10, idleTimeoutMillis: 30000, connectionTimeoutMillis: 30000 }
  * 
- * // Use with postgres library
- * const sql = postgres(connectionString, {
- *   max: poolConfig.max,
- *   min: poolConfig.min,
- *   idle_timeout: poolConfig.timeout,
+ * // Use with pg.Pool
+ * const pool = new Pool({
+ *   connectionString: getDatabaseConnectionString(config),
+ *   ...poolConfig,
  * });
  * ```
  */
 export function getConnectionPoolConfig(config: DatabaseConfig) {
   return {
     max: config.DATABASE_POOL_MAX,
-    timeout: config.DATABASE_TIMEOUT,
+    // Map the single timeout env var to both connection establishment and idle timeouts
+    idleTimeoutMillis: config.DATABASE_TIMEOUT,
+    connectionTimeoutMillis: config.DATABASE_TIMEOUT,
   };
 }
 

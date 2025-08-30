@@ -1,2 +1,2 @@
-export * from "./OrderItem.ts";
-export * from "./OrderStatus.ts";
+export * from "./OrderItem";
+export * from "./OrderStatus";
