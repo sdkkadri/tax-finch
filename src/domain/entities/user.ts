@@ -10,7 +10,7 @@ export class UserEntity {
 
 
 
-  static create(email: string, name: string, id: string): Omit<UserEntity, 'id'>  {
+  static create(email: string, name: string, id: string): UserEntity  {
     return new UserEntity(
       id,
       email,

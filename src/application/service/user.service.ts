@@ -18,15 +18,7 @@ export class UserService {
     }
 
     const userId = nanoid();
-    const userData = UserEntity.create(dto.email, dto.name, userId);
-    // Generate a new ID for the user
-    const user = new UserEntity(
-      userId,
-      userData.email,
-      userData.name,
-      userData.createdAt,
-      userData.updatedAt
-    );
+    const user = UserEntity.create(dto.email, dto.name, userId);
     await this.userRepository.save(user);
     return user;
   }
