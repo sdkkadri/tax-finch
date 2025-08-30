@@ -1,0 +1,4 @@
+[imports]
+"entities" = "./src/domain/entities/index.ts"
+"vo" = "./src/domain/vos/index.ts"
+"dto" = "./src/application/dto.index.ts"
