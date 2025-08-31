@@ -11,6 +11,7 @@ const classes = [
   { name: 'UserController', file: 'application/controller/user.controller.ts', layer: 'application', type: 'controller' },
   { name: 'UserService', file: 'application/service/user.service.ts', layer: 'application', type: 'service' },
   { name: 'ItemController', file: 'application/controller/item.controller.ts', layer: 'application', type: 'controller' },
+  { name: 'OrderController', file: 'application/controller/order.controller.ts', layer: 'application', type: 'controller' },
   { name: 'OrderService', file: 'application/service/order.service.ts', layer: 'application', type: 'service' },
   
   // Infrastructure Layer

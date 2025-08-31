@@ -5,8 +5,8 @@ import { usersTable } from "../schema/users";
 import { injectable, inject } from "tsyringe";
 import type { Database } from "../schema";
 import { EntityConverter } from "../utils/entity-converter";
-import type { QueryOptions, PaginatedResponse } from "../../../application/utils/queryHelper";
-import { paginate } from "../../../application/utils/queryHelper";
+import type { QueryOptions } from "../middlewares/queryParser";
+import { runQuery } from "../utils/queryEngine";
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -39,12 +39,22 @@ export class UserRepository implements IUserRepository {
     return results.map(row => EntityConverter.fromRow(UserEntity, row));
   }
 
-  async findWithPagination(options: QueryOptions): Promise<PaginatedResponse<UserEntity>> {
-    // Use the QueryHelper's paginate function
-    const result = await paginate(this.db, usersTable, 'id', options);
+  async findWithPagination(options: QueryOptions): Promise<any> {
+    // Use the new global query engine
+    const baseQuery = this.db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        name: usersTable.name,
+        createdAt: usersTable.createdAt,
+        updatedAt: usersTable.updatedAt,
+      })
+      .from(usersTable);
+
+    const result = await runQuery(this.db, baseQuery, options);
     
     // Convert the raw database rows to UserEntity objects
-    const data = result.data.map(row => EntityConverter.fromRow(UserEntity, row));
+    const data = result.data.map((row: any) => EntityConverter.fromRow(UserEntity, row));
     
     return {
       data,

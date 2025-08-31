@@ -2,18 +2,21 @@ import type { Context } from "hono";
 import { UserService } from "../service/user.service";
 import { inject, injectable } from "tsyringe";
 import { AppError } from "../utils/app-error";
-import { parseQueryParams } from "../utils/queryHelper";
+import type { QueryOptions } from "../../infrastructure/database/middlewares/queryParser";
 
 @injectable()
 export class UserController {
   constructor(@inject(UserService) private userService: UserService){}
 
   async getAll(c: Context) {
-    // Parse query parameters automatically
-    const queryParams = new URLSearchParams(c.req.query() as Record<string, string>);
-    const queryOptions = parseQueryParams(queryParams);
+    // Get query options from middleware (set by queryParser)
+    const queryOptions = c.get("queryOptions") as QueryOptions;
     
-    // Get paginated results
+    if (!queryOptions) {
+      throw new AppError("Query options not found. Make sure queryParser middleware is configured.", 500);
+    }
+    
+    // Get paginated results using the new query engine
     const result = await this.userService.getUsersWithPagination(queryOptions);
     
     return c.json(result);

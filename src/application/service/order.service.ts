@@ -3,11 +3,16 @@ import type { IOrderRepository } from "../../domain/repositories/iorder.reposito
 import type { IUserRepository } from "../../domain/repositories/iuser.repository";
 import { OrderDomainService } from "../../domain/services/order.domainservice";
 import type { CreateOrderDTOType } from "../dto";
+import type { QueryOptions } from "../../infrastructure/database/middlewares/queryParser";
+import { injectable, inject } from "tsyringe";
+import { OrderRepository } from "../../infrastructure/database/repositories/OrderRepository";
+import { UserRepository } from "../../infrastructure/database/repositories/UserRepository";
 
+@injectable()
 export class OrderService {
   constructor(
-    private orderRepository: IOrderRepository,
-    private userRepository: IUserRepository,
+    @inject(OrderRepository) private orderRepository: OrderRepository,
+    @inject(UserRepository) private userRepository: UserRepository,
   ) {}
 
   async createOrder(dto: CreateOrderDTOType): Promise<OrderEntity> {
@@ -33,6 +38,10 @@ export class OrderService {
       throw new Error("Order not found");
     }
     return order;
+  }
+
+  async getOrdersWithPagination(options: QueryOptions): Promise<any> {
+    return await this.orderRepository.findWithPagination(options);
   }
 
   async confirmOrder(id: string): Promise<OrderEntity> {

@@ -133,6 +133,50 @@ bun run drizzle-kit generate
 bun run drizzle-kit push
 ```
 
+## 🔍 Global Query Engine
+
+Tax Finch now features a powerful **Global Query Engine** that provides automatic pagination, sorting, and filtering across all API endpoints. This system eliminates the need for manual query parameter parsing and ensures consistent API behavior.
+
+### Features
+
+- **Automatic Pagination**: Page-based pagination with `from_page`, `to_page`, and `limit` parameters
+- **Smart Sorting**: Field-based sorting with direction prefixes (`-field` for descending)
+- **Intelligent Filtering**: Automatic filter application based on resource configuration
+- **Global Configuration**: Centralized defaults and per-resource customization
+- **Type Safety**: Full TypeScript support with proper typing
+
+### Usage Examples
+
+```bash
+# Basic pagination
+GET /api/users?from_page=1&limit=10
+
+# Sorting with filtering
+GET /api/users?ordering=-createdAt&limit=20&name=john
+
+# Complex queries
+GET /api/orders?from_page=2&limit=15&ordering=total&status=pending&minTotal=100
+```
+
+### Configuration
+
+The query engine is configured in `src/infrastructure/database/configs/queryEngine.config.ts` with:
+
+- Global defaults (default limit: 20, max limit: 100)
+- Per-resource sort and filter configurations
+- Automatic resource detection from URL paths
+
+### Middleware Integration
+
+The `queryParser` middleware automatically:
+
+- Parses query parameters
+- Applies resource-specific configurations
+- Sets parsed options in request context
+- Handles validation and error cases
+
+For detailed usage, see [QUERY_ENGINE_GUIDE.md](./QUERY_ENGINE_GUIDE.md).
+
 ## 📡 API Endpoints
 
 ### User Management
@@ -144,6 +188,18 @@ bun run drizzle-kit push
 | `POST`   | `/api/users`     | Create new user | `{ "name": "string", "email": "string" }` |
 | `PUT`    | `/api/users/:id` | Update user     | `{ "name": "string" }`                    |
 | `DELETE` | `/api/users/:id` | Delete user     | -                                         |
+
+### Order Management
+
+| Method | Endpoint                   | Description                      | Request Body                             |
+| ------ | -------------------------- | -------------------------------- | ---------------------------------------- |
+| `GET`  | `/api/orders`              | Get all orders (with pagination) | -                                        |
+| `GET`  | `/api/orders/:id`          | Get order by ID                  | -                                        |
+| `POST` | `/api/orders`              | Create new order                 | `{ "userId": "string", "items": [...] }` |
+| `POST` | `/api/orders/:id/confirm`  | Confirm order                    | -                                        |
+| `POST` | `/api/orders/:id/ship`     | Ship order                       | -                                        |
+| `GET`  | `/api/orders/user/:userId` | Get orders for user              | -                                        |
+| `GET`  | `/api/orders/:id/discount` | Get order with discount calc     | -                                        |
 
 ### Example Usage
 
