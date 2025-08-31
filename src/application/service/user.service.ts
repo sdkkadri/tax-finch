@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import { inject, injectable } from "tsyringe";
 import { UserRepository } from "../../infrastructure/database/repositories/UserRepository";
 import { AppError } from "../utils/app-error";
+import type { QueryOptions, PaginatedResponse } from "../utils/queryHelper";
 
 @injectable()
 export class UserService {
@@ -73,5 +74,14 @@ export class UserService {
    */
   async getAllUsers(): Promise<UserEntity[]> {
     return await this.userRepository.findAll();
+  }
+
+  /**
+   * Retrieves users with cursor-based pagination, sorting, and filtering
+   * @param options - Query options including pagination, sorting, and filtering
+   * @returns Promise<PaginatedResponse<UserEntity>> - Paginated response with users and metadata
+   */
+  async getUsersWithPagination(options: QueryOptions): Promise<PaginatedResponse<UserEntity>> {
+    return await this.userRepository.findWithPagination(options);
   }
 }

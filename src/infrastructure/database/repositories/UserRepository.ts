@@ -1,10 +1,12 @@
-import { eq } from "drizzle-orm";
+import { eq, like, desc, asc, count, sql } from "drizzle-orm";
 import { UserEntity } from "../../../domain/entities/user";
 import type { IUserRepository } from "../../../domain/repositories/iuser.repository";
 import { usersTable } from "../schema/users";
 import { injectable, inject } from "tsyringe";
 import type { Database } from "../schema";
 import { EntityConverter } from "../utils/entity-converter";
+import type { QueryOptions, PaginatedResponse } from "../../../application/utils/queryHelper";
+import { paginate } from "../../../application/utils/queryHelper";
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -35,6 +37,19 @@ export class UserRepository implements IUserRepository {
   async findAll(): Promise<UserEntity[]> {
     const results = await this.db.select().from(usersTable);
     return results.map(row => EntityConverter.fromRow(UserEntity, row));
+  }
+
+  async findWithPagination(options: QueryOptions): Promise<PaginatedResponse<UserEntity>> {
+    // Use the QueryHelper's paginate function
+    const result = await paginate(this.db, usersTable, 'id', options);
+    
+    // Convert the raw database rows to UserEntity objects
+    const data = result.data.map(row => EntityConverter.fromRow(UserEntity, row));
+    
+    return {
+      data,
+      pagination: result.pagination
+    };
   }
 
   async createUser(user: UserEntity): Promise<void> {

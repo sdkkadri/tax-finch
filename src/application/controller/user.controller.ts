@@ -2,14 +2,21 @@ import type { Context } from "hono";
 import { UserService } from "../service/user.service";
 import { inject, injectable } from "tsyringe";
 import { AppError } from "../utils/app-error";
+import { parseQueryParams } from "../utils/queryHelper";
 
 @injectable()
 export class UserController {
   constructor(@inject(UserService) private userService: UserService){}
 
   async getAll(c: Context) {
-    const users = await this.userService.getAllUsers();
-    return c.json({ users });
+    // Parse query parameters automatically
+    const queryParams = new URLSearchParams(c.req.query() as Record<string, string>);
+    const queryOptions = parseQueryParams(queryParams);
+    
+    // Get paginated results
+    const result = await this.userService.getUsersWithPagination(queryOptions);
+    
+    return c.json(result);
   }
 
   async create(c: Context) {
