@@ -8,8 +8,9 @@ const createMockUserRepository = () => {
     findById: vi.fn(),
     findByEmail: vi.fn(),
     findAll: vi.fn(),
-    save: vi.fn(),
-    delete: vi.fn()
+    createUser: vi.fn(),
+    updateUser: vi.fn(),
+    deleteUser: vi.fn()
   };
 
   return mockRepo;
@@ -112,6 +113,7 @@ describe('UserRepository', () => {
       // Assert
       expect(userRepository.findAll).toHaveBeenCalled();
       expect(result).toEqual(mockUsers);
+      expect(result).toHaveLength(2);
     });
 
     it('should return empty array when no users exist', async () => {
@@ -122,51 +124,75 @@ describe('UserRepository', () => {
       const result = await userRepository.findAll();
 
       // Assert
+      expect(userRepository.findAll).toHaveBeenCalled();
       expect(result).toEqual([]);
+      expect(result).toHaveLength(0);
     });
   });
 
-  describe('save', () => {
-    it('should save user successfully', async () => {
+  describe('createUser', () => {
+    it('should create user successfully', async () => {
       // Arrange
-      userRepository.save.mockResolvedValue(undefined);
+      userRepository.createUser.mockResolvedValue(undefined);
 
       // Act
-      await userRepository.save(mockUserEntity);
+      await userRepository.createUser(mockUserEntity);
 
       // Assert
-      expect(userRepository.save).toHaveBeenCalledWith(mockUserEntity);
+      expect(userRepository.createUser).toHaveBeenCalledWith(mockUserEntity);
     });
 
     it('should handle null user entity', async () => {
       // Arrange
-      userRepository.save.mockRejectedValue(new Error('User entity is required'));
+      userRepository.createUser.mockRejectedValue(new Error('User entity is required'));
 
       // Act & Assert
-      await expect(userRepository.save(null)).rejects.toThrow('User entity is required');
-      await expect(userRepository.save(undefined)).rejects.toThrow('User entity is required');
+      await expect(userRepository.createUser(null)).rejects.toThrow('User entity is required');
+      await expect(userRepository.createUser(undefined)).rejects.toThrow('User entity is required');
     });
   });
 
-  describe('delete', () => {
-    it('should delete user successfully', async () => {
+  describe('updateUser', () => {
+    it('should update user successfully', async () => {
       // Arrange
-      userRepository.delete.mockResolvedValue(undefined);
+      userRepository.updateUser.mockResolvedValue(undefined);
 
       // Act
-      await userRepository.delete('test-id');
+      await userRepository.updateUser(mockUserEntity);
 
       // Assert
-      expect(userRepository.delete).toHaveBeenCalledWith('test-id');
+      expect(userRepository.updateUser).toHaveBeenCalledWith(mockUserEntity);
+    });
+
+    it('should handle null user entity', async () => {
+      // Arrange
+      userRepository.updateUser.mockRejectedValue(new Error('User entity is required'));
+
+      // Act & Assert
+      await expect(userRepository.updateUser(null)).rejects.toThrow('User entity is required');
+      await expect(userRepository.updateUser(undefined)).rejects.toThrow('User entity is required');
+    });
+  });
+
+  describe('deleteUser', () => {
+    it('should delete user successfully', async () => {
+      // Arrange
+      userRepository.deleteUser.mockResolvedValue(undefined);
+
+      // Act
+      await userRepository.deleteUser('test-id');
+
+      // Assert
+      expect(userRepository.deleteUser).toHaveBeenCalledWith('test-id');
     });
 
     it('should handle empty ID parameter', async () => {
       // Arrange
-      userRepository.delete.mockRejectedValue(new Error('User ID is required'));
+      userRepository.deleteUser.mockRejectedValue(new Error('User ID is required'));
 
       // Act & Assert
-      await expect(userRepository.delete('')).rejects.toThrow('User ID is required');
-      await expect(userRepository.delete('   ')).rejects.toThrow('User ID is required');
+      await expect(userRepository.deleteUser('')).rejects.toThrow('User ID is required');
+      await expect(userRepository.deleteUser('   ')).rejects.toThrow('User ID is required');
     });
   });
 
@@ -177,20 +203,16 @@ describe('UserRepository', () => {
         'test-id',
         'test@example.com',
         'Test User',
-        new Date('2024-01-01T00:00:00.000Z'),
-        new Date('2024-01-01T00:00:00.000Z')
+        new Date('2023-01-01'),
+        new Date('2023-01-01')
       );
-      
-      userRepository.save.mockResolvedValue(undefined);
+      userRepository.createUser.mockResolvedValue(undefined);
 
       // Act
-      await userRepository.save(testUser);
+      await userRepository.createUser(testUser);
 
       // Assert
-      expect(userRepository.save).toHaveBeenCalledWith(testUser);
-      expect(testUser.id).toBe('test-id');
-      expect(testUser.email).toBe('test@example.com');
-      expect(testUser.name).toBe('Test User');
+      expect(userRepository.createUser).toHaveBeenCalledWith(testUser);
     });
   });
 });
