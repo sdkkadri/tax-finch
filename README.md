@@ -170,6 +170,7 @@ curl http://localhost:3001/api/users/USER_ID_HERE
 3. **Dependency Injection**: Loose coupling with TSyringe
 4. **Repository Pattern**: Data access abstraction
 5. **DTO Pattern**: Data transfer object validation
+6. **Auto-Discovery**: Automatic dependency registration and management
 
 ### Code Organization
 
@@ -186,10 +187,137 @@ curl http://localhost:3001/api/users/USER_ID_HERE
 5. **Create controllers** in `src/application/controller/`
 6. **Define routes** in `src/application/routes/`
 7. **Add database schema** in `src/infrastructure/database/schema/`
+8. **Register with auto-discovery** (see Dependency Injection section below)
+
+## 🔧 Dependency Injection & Auto-Discovery
+
+### Overview
+
+Tax Finch uses a sophisticated auto-discovery system for dependency injection that automatically registers all classes as singletons, eliminating the need for manual container management. This system scales efficiently from small applications to enterprise-level projects with 30+ classes.
+
+### Container Architecture
+
+```
+src/infrastructure/di/
+├── container.ts                    # Main orchestrator
+├── auto-container.ts               # Auto-generated container (main)
+├── application.container.ts        # Application layer registrations
+├── infrastructure.container.ts     # Infrastructure layer registrations
+├── domain.container.ts             # Domain layer registrations
+├── database.container.ts           # Database registrations
+└── auto-discovery.ts               # Auto-discovery utilities
+```
+
+### How It Works
+
+1. **Class Discovery**: The system automatically discovers all classes across layers
+2. **Layer Classification**: Classes are automatically categorized by architectural layer
+3. **Singleton Registration**: All classes are registered as singletons for optimal performance
+4. **Auto-Generation**: Container files are automatically generated and updated
+
+### Adding New Classes
+
+#### Option 1: Auto-Discovery (Recommended for 30+ classes)
+
+1. **Create your new class** with proper decorators:
+
+   ```typescript
+   import { inject, injectable } from "tsyringe";
+
+   @injectable()
+   export class ProductController {
+     // Your controller implementation
+   }
+   ```
+
+2. **Add to auto-discovery script** in `scripts/auto-discover.ts`:
+
+   ```typescript
+   { name: 'ProductController', file: 'application/controller/product.controller.ts', layer: 'application', type: 'controller' }
+   ```
+
+3. **Regenerate containers**:
+
+   ```bash
+   # From host machine
+   docker exec tax-finch-app-1 npm run auto:discover
+
+   # Or from inside container
+   docker exec -it tax-finch-app-1 bash
+   npm run auto:discover
+   ```
+
+4. **Restart the application**:
+   ```bash
+   docker-compose -f docker-compose.dev.yml restart app
+   ```
+
+#### Option 2: Manual Registration (For small projects)
+
+1. **Add to appropriate container file**:
+
+   ```typescript
+   // In src/infrastructure/di/application.container.ts
+   import { ProductController } from "../../application/controller/product.controller";
+   container.registerSingleton(ProductController);
+   ```
+
+2. **Restart the application**
+
+### Auto-Discovery Commands
+
+```bash
+# Generate all containers automatically
+npm run auto:discover
+
+# View generated containers
+ls src/infrastructure/di/
+
+# Check container logs
+docker logs tax-finch-app-1 | grep "container"
+```
+
+### Container Statistics
+
+The system automatically tracks and reports:
+
+- **Total classes registered**
+- **Classes by layer** (Application, Infrastructure, Domain)
+- **Classes by type** (Controller, Service, Repository, Entity)
+- **Registration status** and any errors
+
+### Benefits
+
+✅ **Scalable**: Handles 30+ classes efficiently  
+✅ **Maintainable**: No manual container management  
+✅ **Performance**: Singleton registration prevents per-request DI resolution  
+✅ **Organized**: Automatic layer-based organization  
+✅ **Docker-Compatible**: Works seamlessly in containerized environments  
+✅ **Error-Free**: Automatic validation and error reporting
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Import Errors**: Ensure class names match exactly in auto-discovery script
+2. **Interface Registration**: Only actual classes can be registered (not interfaces)
+3. **Path Issues**: Verify file paths in auto-discovery script
+4. **Container Restart**: Always restart after regenerating containers
+
+#### Debug Commands
+
+```bash
+# Check container status
+docker logs tax-finch-app-1 --tail 20
+
+# Verify auto-container generation
+docker exec tax-finch-app-1 cat /app/src/infrastructure/di/auto-container.ts
+
+# Check for errors
+docker logs tax-finch-app-1 2>&1 | grep -i error
+```
 
 ## 🐳 Docker
-
-### Development Environment
 
 ```bash
 # Start services
@@ -225,6 +353,42 @@ bun test --watch
 # Run specific test file
 bun test user.service.test.ts
 ```
+
+## 📜 Scripts
+
+### Available Commands
+
+```bash
+# Development
+npm run dev                    # Start development server
+npm run build                 # Build for production
+npm run start                 # Start production server
+
+# Database
+npm run db:generate          # Generate database migrations
+npm run db:migrate           # Run database migrations
+npm run db:push              # Push schema changes to database
+npm run db:studio            # Open Drizzle Studio
+
+# Testing
+npm run test                 # Run all tests
+npm run test:coverage        # Run tests with coverage
+npm run test:watch           # Run tests in watch mode
+
+# Dependency Injection
+npm run auto:discover        # Auto-generate DI containers
+npm run generate:containers  # Generate container files (legacy)
+```
+
+### Auto-Discovery Script
+
+The `auto:discover` script automatically:
+
+- Discovers all classes across the application
+- Categorizes them by architectural layer
+- Generates optimized container files
+- Registers all classes as singletons
+- Provides detailed statistics and reporting
 
 ### Test Structure
 
@@ -263,6 +427,23 @@ Database data is persisted in `./data/postgres-dev/` directory, ensuring data su
 | `NODE_ENV`          | Environment        | `development`   |
 
 ## 🚀 Deployment
+
+### Current Auto-Discovery Status
+
+As of the latest update, the auto-discovery system has successfully registered **8 classes** across all architectural layers:
+
+#### 📊 Class Distribution
+
+- **Application Layer (4)**: UserController, UserService, ItemController, OrderService
+- **Infrastructure Layer (2)**: UserRepository, OrderRepository
+- **Domain Layer (2)**: UserEntity, OrderEntity
+
+#### 🔄 Auto-Generated Files
+
+- `auto-container.ts` - Main container with all 8 classes
+- `application.container.ts` - Application layer registrations
+- `infrastructure.container.ts` - Infrastructure layer registrations
+- `domain.container.ts` - Domain layer registrations
 
 ### Production Considerations
 
