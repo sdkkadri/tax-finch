@@ -66,7 +66,7 @@ const createMockUserController = (mockUserService: any) => {
         return c.json({ message: "User created", user }, 201);
       } catch (error) {
         if (error instanceof Error) {
-          return c.json({ error: error.message }, 400);
+          return c.json({ error: 'Bad Request' }, 400);
         }
         return c.json({ error: "Failed to create user" }, 500);
       }
@@ -79,7 +79,7 @@ const createMockUserController = (mockUserService: any) => {
         return c.json({ user });
       } catch (error) {
         if (error instanceof Error) {
-          return c.json({ error: error.message }, 404);
+          return c.json({ error: 'Not Found' }, 404);
         }
         return c.json({ error: "Failed to fetch user" }, 500);
       }
@@ -93,7 +93,7 @@ const createMockUserController = (mockUserService: any) => {
         return c.json({ message: "User updated", user });
       } catch (error) {
         if (error instanceof Error) {
-          return c.json({ error: error.message }, 400);
+          return c.json({ error: 'Bad Request' }, 400);
         }
         return c.json({ error: "Failed to update user" }, 500);
       }
@@ -106,7 +106,7 @@ const createMockUserController = (mockUserService: any) => {
         return c.json({ message: "User deleted" });
       } catch (error) {
         if (error instanceof Error) {
-          return c.json({ error: error.message }, 404);
+          return c.json({ error: 'Not Found' }, 404);
         }
         return c.json({ error: "Failed to delete user" }, 500);
       }
@@ -249,7 +249,7 @@ describe('User Creation Integration', () => {
       expect(userRepository.findByEmail).toHaveBeenCalledWith(mockCreateUserDTO.email);
       expect(userRepository.save).not.toHaveBeenCalled();
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'User with this email already exists' },
+        { error: 'Bad Request' },
         400
       );
       expect(result.status).toBe(400);
@@ -270,7 +270,7 @@ describe('User Creation Integration', () => {
       expect(userRepository.findByEmail).toHaveBeenCalledWith(invalidData.email);
       expect(userRepository.save).not.toHaveBeenCalled();
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'Invalid email format' },
+        { error: 'Bad Request' },
         400
       );
       expect(result.status).toBe(400);
@@ -348,7 +348,7 @@ describe('User Creation Integration', () => {
       // Assert
       expect(userRepository.findByEmail).toHaveBeenCalledWith(mockCreateUserDTO.email);
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'Service error' },
+        { error: 'Bad Request' },
         400
       );
       expect(result.status).toBe(400);

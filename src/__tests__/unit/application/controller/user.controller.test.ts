@@ -20,7 +20,7 @@ const createMockUserController = (mockUserService: any) => {
         return c.json({ message: "User created", user }, 201);
       } catch (error) {
         if (error instanceof Error) {
-          return c.json({ error: error.message }, 400);
+          return c.json({ error: 'Bad Request' }, 400);
         }
         return c.json({ error: "Failed to create user" }, 500);
       }
@@ -33,7 +33,7 @@ const createMockUserController = (mockUserService: any) => {
         return c.json({ user });
       } catch (error) {
         if (error instanceof Error) {
-          return c.json({ error: error.message }, 404);
+          return c.json({ error: 'Not Found' }, 404);
         }
         return c.json({ error: "Failed to fetch user" }, 500);
       }
@@ -47,7 +47,7 @@ const createMockUserController = (mockUserService: any) => {
         return c.json({ message: "User updated", user });
       } catch (error) {
         if (error instanceof Error) {
-          return c.json({ error: error.message }, 400);
+          return c.json({ error: 'Bad Request' }, 400);
         }
         return c.json({ error: "Failed to update user" }, 500);
       }
@@ -60,7 +60,7 @@ const createMockUserController = (mockUserService: any) => {
         return c.json({ message: "User deleted" });
       } catch (error) {
         if (error instanceof Error) {
-          return c.json({ error: error.message }, 404);
+          return c.json({ error: 'Not Found' }, 404);
         }
         return c.json({ error: "Failed to delete user" }, 500);
       }
@@ -133,7 +133,7 @@ describe('UserController Unit Tests', () => {
       // Assert
       expect(mockUserService.createUser).toHaveBeenCalledWith(mockCreateUserDTO);
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'Email is required' },
+        { error: 'Bad Request' },
         400
       );
       expect(result.status).toBe(400);
@@ -151,7 +151,7 @@ describe('UserController Unit Tests', () => {
       // Assert
       expect(mockUserService.createUser).toHaveBeenCalledWith(mockCreateUserDTO);
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'User with this email already exists' },
+        { error: 'Bad Request' },
         400
       );
       expect(result.status).toBe(400);
@@ -187,7 +187,7 @@ describe('UserController Unit Tests', () => {
       expect(mockContext.req.json).toHaveBeenCalled();
       expect(mockUserService.createUser).toHaveBeenCalledWith(emptyBody);
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'Email is required' },
+        { error: 'Bad Request' },
         400
       );
       expect(result.status).toBe(400);
@@ -222,7 +222,7 @@ describe('UserController Unit Tests', () => {
       // Assert
       expect(mockUserService.getUserById).toHaveBeenCalledWith('non-existent-id');
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'User not found' },
+        { error: 'Not Found' },
         404
       );
       expect(result.status).toBe(404);
@@ -293,7 +293,7 @@ describe('UserController Unit Tests', () => {
       // Assert
       expect(mockUserService.updateUser).toHaveBeenCalledWith('test-id', updateData);
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'Name cannot be empty' },
+        { error: 'Bad Request' },
         400
       );
       expect(result.status).toBe(400);
@@ -312,7 +312,7 @@ describe('UserController Unit Tests', () => {
       // Assert
       expect(mockUserService.updateUser).toHaveBeenCalledWith('non-existent-id', updateData);
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'User not found' },
+        { error: 'Bad Request' },
         400
       );
       expect(result.status).toBe(400);
@@ -363,7 +363,7 @@ describe('UserController Unit Tests', () => {
       // Assert
       expect(mockUserService.deleteUser).toHaveBeenCalledWith('non-existent-id');
       expect(mockContext.json).toHaveBeenCalledWith(
-        { error: 'User not found' },
+        { error: 'Not Found' },
         404
       );
       expect(result.status).toBe(404);

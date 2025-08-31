@@ -6,8 +6,9 @@ import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { container } from "tsyringe";
 import { DatabaseConnection } from "./infrastructure/database/connection";
-import "./infrastructure/database/container";
+import "./infrastructure/di/container";
 import routes from "./application/routes";
+import { AppError, type HttpStatusCode } from "./application/utils/app-error";
 
 // Export database types and schema for use throughout the application
 export { schema } from "./infrastructure/database/schema";
@@ -30,16 +31,26 @@ app.notFound((c) => c.json({ error: "Not Found" }, 404));
 
 // Global error handler with sanitized logging
 app.onError((err, c) => {
-  const isProduction = process.env.NODE_ENV === "production";
+  const isAppError = err instanceof AppError;
+  const status: HttpStatusCode = isAppError ? err.status : 500;
+  const clientMessage = isAppError ? err.message : "Internal Server Error";
+
   const logPayload: Record<string, unknown> = {
     name: err.name,
     message: err.message,
+    path: c.req.path,
+    method: c.req.method,
+    status,
   };
-  if (!isProduction && err.stack) {
+  if (isAppError) {
+    logPayload.code = err.code as unknown as string;
+    logPayload.details = err.details as unknown;
+  }
+  if (err.stack) {
     logPayload.stack = err.stack;
   }
   console.error("Unhandled application error:", logPayload);
-  return c.json({ error: isProduction ? "Internal Server Error" : err.message }, 500);
+  return c.json({ error: clientMessage }, status);
 });
 
 const port = parseInt(process.env.PORT ?? "3000", 10);

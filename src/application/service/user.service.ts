@@ -5,6 +5,7 @@ import type { CreateUserDTOType, UpdateUserDTOType } from "../dto";
 import { nanoid } from "nanoid";
 import { inject, injectable } from "tsyringe";
 import { UserRepository } from "infrastructure/database/repositories/UserRepository";
+import { AppError } from "../utils/app-error";
 
 @injectable()
 export class UserService {
@@ -14,7 +15,7 @@ export class UserService {
   async createUser(dto: CreateUserDTOType): Promise<UserEntity> {
     const existingUser = await this.userRepository.findByEmail(dto.email);
     if (existingUser) {
-      throw new Error("User with this email already exists");
+      throw AppError.conflict("A user with this email already exists", "email_exists");
     }
 
     const userId = nanoid();
@@ -26,7 +27,7 @@ export class UserService {
   async getUserById(id: string): Promise<UserEntity> {
     const user = await this.userRepository.findById(id);
     if (!user) {
-      throw new Error("User not found");
+      throw AppError.notFound("User not found", "user_not_found");
     }
     return user;
   }
