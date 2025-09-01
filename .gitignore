@@ -27,7 +27,7 @@ lerna-debug.log*
 # database data
 data/
 
-# test coverage
+# test coverage,
 coverage/
 *.lcov
 *.coverage
