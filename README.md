@@ -22,7 +22,7 @@ src/
 - **Runtime**: Node.js with TypeScript
 - **Framework**: Hono (lightweight web framework)
 - **Database**: PostgreSQL with Drizzle ORM
-- **Dependency Injection**: TSyringe
+- **Dependency Injection**: TSyringe with Interface-based Injection
 - **Validation**: Zod
 - **Containerization**: Docker & Docker Compose
 - **Package Manager**: Bun
@@ -177,6 +177,8 @@ The `queryParser` middleware automatically:
 
 For detailed usage, see [QUERY_ENGINE_GUIDE.md](./QUERY_ENGINE_GUIDE.md).
 
+For comprehensive DI architecture details, see [DI_ALIGNMENT_GUIDE.md](./DI_ALIGNMENT_GUIDE.md).
+
 ## 📡 API Endpoints
 
 ### User Management
@@ -210,8 +212,11 @@ curl --request POST \
   --header 'content-type: application/json' \
   --data '{"name":"John Doe","email":"john@example.com"}'
 
-# Get all users
-curl http://localhost:3001/api/users
+# Get all users with pagination
+curl "http://localhost:3001/api/users?from_page=1&limit=10"
+
+# Get users with sorting and filtering
+curl "http://localhost:3001/api/users?from_page=1&limit=5&ordering=-createdAt&name=john"
 
 # Get user by ID
 curl http://localhost:3001/api/users/USER_ID_HERE
@@ -223,8 +228,8 @@ curl http://localhost:3001/api/users/USER_ID_HERE
 
 1. **Clean Architecture**: Separation of concerns between layers
 2. **Domain-Driven Design**: Business logic in domain layer
-3. **Dependency Injection**: Loose coupling with TSyringe
-4. **Repository Pattern**: Data access abstraction
+3. **Dependency Injection**: Interface-based injection with TSyringe
+4. **Repository Pattern**: Data access abstraction with interface contracts
 5. **DTO Pattern**: Data transfer object validation
 6. **Auto-Discovery**: Automatic dependency registration and management
 
@@ -251,15 +256,44 @@ curl http://localhost:3001/api/users/USER_ID_HERE
 
 Tax Finch uses a sophisticated auto-discovery system for dependency injection that automatically registers all classes as singletons, eliminating the need for manual container management. This system scales efficiently from small applications to enterprise-level projects with 30+ classes.
 
+### DI Architecture & Interface Injection
+
+Our DI system follows **interface-based injection** principles:
+
+- **Repository Interfaces**: Define contracts in domain layer
+- **Interface Tokens**: Symbol-based tokens for DI registration
+- **Concrete Implementations**: Implement interfaces in infrastructure layer
+- **Service Injection**: Services depend on interfaces, not concrete classes
+
+#### Example Structure
+
+```typescript
+// Domain Interface
+export interface IUserRepository {
+  findById(id: string): Promise<UserEntity | null>;
+  // ... other methods
+}
+export const IUserRepository = Symbol("IUserRepository");
+
+// Infrastructure Implementation
+@injectable()
+export class UserRepository implements IUserRepository {
+  // Implementation
+}
+
+// Service Injection
+@injectable()
+export class UserService {
+  constructor(@inject(IUserRepository) private userRepository: IUserRepository) {}
+}
+```
+
 ### Container Architecture
 
 ```
 src/infrastructure/di/
 ├── container.ts                    # Main orchestrator
 ├── auto-container.ts               # Auto-generated container (main)
-├── application.container.ts        # Application layer registrations
-├── infrastructure.container.ts     # Infrastructure layer registrations
-├── domain.container.ts             # Domain layer registrations
 ├── database.container.ts           # Database registrations
 └── auto-discovery.ts               # Auto-discovery utilities
 ```
@@ -267,7 +301,7 @@ src/infrastructure/di/
 ### How It Works
 
 1. **Class Discovery**: The system automatically discovers all classes across layers
-2. **Layer Classification**: Classes are automatically categorized by architectural layer
+2. **Interface Registration**: Repositories are registered with interface tokens
 3. **Singleton Registration**: All classes are registered as singletons for optimal performance
 4. **Auto-Generation**: Container files are automatically generated and updated
 
@@ -313,7 +347,7 @@ src/infrastructure/di/
 1. **Add to appropriate container file**:
 
    ```typescript
-   // In src/infrastructure/di/application.container.ts
+   // In src/infrastructure/di/auto-container.ts
    import { ProductController } from "../../application/controller/product.controller";
    container.registerSingleton(ProductController);
    ```
@@ -349,7 +383,9 @@ The system automatically tracks and reports:
 ✅ **Performance**: Singleton registration prevents per-request DI resolution  
 ✅ **Organized**: Automatic layer-based organization  
 ✅ **Docker-Compatible**: Works seamlessly in containerized environments  
-✅ **Error-Free**: Automatic validation and error reporting
+✅ **Error-Free**: Automatic validation and error reporting  
+✅ **Interface-Based**: Loose coupling through interface injection  
+✅ **Testable**: Easy to mock dependencies for unit testing  
 
 ### Troubleshooting
 

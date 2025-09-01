@@ -3,7 +3,7 @@ import type { IUserRepository } from "../../domain/repositories/iuser.repository
 import type { CreateUserDTOType, UpdateUserDTOType } from "../dto";
 import { nanoid } from "nanoid";
 import { inject, injectable } from "tsyringe";
-import { UserRepository } from "../../infrastructure/database/repositories/UserRepository";
+import { IUserRepository as IUserRepositoryToken } from "../../domain/repositories/iuser.repository";
 import { AppError } from "../utils/app-error";
 import type { QueryOptions } from "../../infrastructure/database/middlewares/queryParser";
 import type { PaginatedResponse } from "../../domain/types";
@@ -11,7 +11,7 @@ import type { PaginatedResponse } from "../../domain/types";
 @injectable()
 export class UserService {
 
-  constructor(@inject(UserRepository) private userRepository: UserRepository) {}
+  constructor(@inject(IUserRepositoryToken) private userRepository: IUserRepository) {}
 
   /**
    * Creates a new user

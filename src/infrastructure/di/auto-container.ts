@@ -15,6 +15,8 @@ import { UserRepository } from "../../infrastructure/database/repositories/UserR
 import { OrderRepository } from "../../infrastructure/database/repositories/OrderRepository";
 import { UserEntity } from "../../domain/entities/user";
 import { OrderEntity } from "../../domain/entities/order";
+import { IUserRepository } from "../../domain/repositories/iuser.repository";
+import { IOrderRepository } from "../../domain/repositories/iorder.repository";
 
 // Register all classes as singletons
 container.registerSingleton(UserController);
@@ -22,10 +24,12 @@ container.registerSingleton(UserService);
 container.registerSingleton(ItemController);
 container.registerSingleton(OrderController);
 container.registerSingleton(OrderService);
-container.registerSingleton(UserRepository);
-container.registerSingleton(OrderRepository);
 container.registerSingleton(UserEntity);
 container.registerSingleton(OrderEntity);
+
+// Register repositories with interface tokens
+container.registerSingleton(IUserRepository, UserRepository);
+container.registerSingleton(IOrderRepository, OrderRepository);
 
 console.log('Auto-container initialized with', 9, 'classes');
 console.log('Layers:', {

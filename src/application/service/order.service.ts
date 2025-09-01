@@ -5,15 +5,15 @@ import { OrderDomainService } from "../../domain/services/order.domainservice";
 import type { CreateOrderDTOType } from "../dto";
 import type { QueryOptions } from "../../infrastructure/database/middlewares/queryParser";
 import { injectable, inject } from "tsyringe";
-import { OrderRepository } from "../../infrastructure/database/repositories/OrderRepository";
-import { UserRepository } from "../../infrastructure/database/repositories/UserRepository";
+import { IOrderRepository as IOrderRepositoryToken } from "../../domain/repositories/iorder.repository";
+import { IUserRepository as IUserRepositoryToken } from "../../domain/repositories/iuser.repository";
 import type { PaginatedResponse, OrderWithUserDetails, BaseOrder } from "../../domain/types";
 
 @injectable()
 export class OrderService {
   constructor(
-    @inject(OrderRepository) private orderRepository: OrderRepository,
-    @inject(UserRepository) private userRepository: UserRepository,
+    @inject(IOrderRepositoryToken) private orderRepository: IOrderRepository,
+    @inject(IUserRepositoryToken) private userRepository: IUserRepository,
   ) {}
 
   async createOrder(dto: CreateOrderDTOType): Promise<OrderEntity> {
