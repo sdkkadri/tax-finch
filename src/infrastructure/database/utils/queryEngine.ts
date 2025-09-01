@@ -81,3 +81,4 @@ async function simplePaginate(db: any, query: any, pagination: { fromPage: numbe
     },
   };
 }
+
