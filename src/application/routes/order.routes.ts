@@ -34,9 +34,14 @@ orderRoutes.post("/:id/ship", zValidator("param", idParamSchema), (c) => {
   return orderController.ship(c);
 });
 
-// GET /orders/user/:userId - Get orders for a specific user
+// GET /orders/user/:userId - Get orders for a specific user (no pagination)
 orderRoutes.get("/user/:userId", zValidator("param", userIdParamSchema), (c) => {
   return orderController.getUserOrders(c);
+});
+
+// GET /orders/user/:userId/paginated - Get paginated orders for a specific user with query engine
+orderRoutes.get("/user/:userId/paginated", zValidator("param", userIdParamSchema), (c) => {
+  return orderController.getUserOrdersWithPagination(c);
 });
 
 // GET /orders/:id/discount - Get order with discount calculation

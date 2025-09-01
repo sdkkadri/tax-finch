@@ -4,6 +4,8 @@ import { ordersTable } from "./orders";
 import { orderStatusesTable } from "./order_statuses";
 import { itemsTable } from "./items";
 
+
+
 export const schema = {
   users: usersTable,
   orders: ordersTable,

@@ -1,12 +1,14 @@
-import { eq } from "drizzle-orm";
+import { eq, like, desc, asc, count, sql } from "drizzle-orm";
 import { OrderEntity } from "../../../domain/entities/order";
 import type { IOrderRepository } from "../../../domain/repositories/iorder.repository";
 import { ordersTable } from "../schema/orders";
+import { usersTable } from "../schema/users";
 import { injectable, inject } from "tsyringe";
 import type { Database } from "../schema";
 import { EntityConverter } from "../utils/entity-converter";
 import type { QueryOptions } from "../middlewares/queryParser";
 import { runQuery } from "../utils/queryEngine";
+import type { OrderWithUserDetails, OrderWithUserRow, PaginatedResponse, BaseOrder } from "../../../domain/types";
 
 @injectable()
 export class OrderRepository implements IOrderRepository {
@@ -53,6 +55,89 @@ export class OrderRepository implements IOrderRepository {
     
     // Convert the raw database rows to OrderEntity objects
     const data = result.data.map((row: any) => EntityConverter.fromRow(OrderEntity, row));
+    
+    return {
+      data,
+      pagination: result.pagination
+    };
+  }
+
+  async findUserOrdersWithPagination(userId: string, options: QueryOptions): Promise<PaginatedResponse<BaseOrder>> {
+    // Use the new global query engine with user filter and user details
+    const baseQuery = this.db
+      .select({
+        // Order fields
+        id: ordersTable.id,
+        userId: ordersTable.userId,
+        items: ordersTable.items,
+        status: ordersTable.status,
+        total: ordersTable.total,
+        createdAt: ordersTable.createdAt,
+        updatedAt: ordersTable.updatedAt,
+        // User fields
+        userName: usersTable.name,
+        userEmail: usersTable.email,
+      })
+      .from(ordersTable)
+      .innerJoin(usersTable, eq(ordersTable.userId, usersTable.id))
+      .where(eq(ordersTable.userId, userId));
+
+    const result = await runQuery(this.db, baseQuery, options);
+    
+    // Convert the raw database rows to OrderEntity objects with user info
+    const data: OrderWithUserDetails[] = result.data.map((row: OrderWithUserRow) => {
+      const order = EntityConverter.fromRow(OrderEntity, row);
+      // Add user details to the order object
+      return {
+        ...order,
+        user: {
+          id: row.userId,
+          name: row.userName,
+          email: row.userEmail,
+        }
+      };
+    });
+    
+    return {
+      data,
+      pagination: result.pagination
+    };
+  }
+
+  async findOrdersWithUserDetails(options: QueryOptions): Promise<PaginatedResponse<OrderWithUserDetails>> {
+    // Use the new global query engine with user details for all orders
+    const baseQuery = this.db
+      .select({
+        // Order fields
+        id: ordersTable.id,
+        userId: ordersTable.userId,
+        items: ordersTable.items,
+        status: ordersTable.status,
+        total: ordersTable.total,
+        createdAt: ordersTable.createdAt,
+        updatedAt: ordersTable.updatedAt,
+        // User fields
+        userName: usersTable.name,
+        userEmail: usersTable.email,
+      })
+      .from(ordersTable)
+      .innerJoin(usersTable, eq(ordersTable.userId, usersTable.id));
+
+    const result = await runQuery(this.db, baseQuery, options);
+    
+    // Convert the raw database rows to OrderEntity objects with user info
+    const data: OrderWithUserDetails[] = result.data.map((row: OrderWithUserRow) => {
+      const order = EntityConverter.fromRow(OrderEntity, row);
+      // Add user details to the order object
+      return {
+        ...order,
+        user: {
+          id: row.userId,
+          name: row.userName,
+          email: row.userEmail,
+        }
+      };
+    });
     
     return {
       data,

@@ -5,7 +5,8 @@ import { nanoid } from "nanoid";
 import { inject, injectable } from "tsyringe";
 import { UserRepository } from "../../infrastructure/database/repositories/UserRepository";
 import { AppError } from "../utils/app-error";
-import type { QueryOptions, PaginatedResponse } from "../utils/queryHelper";
+import type { QueryOptions } from "../../infrastructure/database/middlewares/queryParser";
+import type { PaginatedResponse } from "../../domain/types";
 
 @injectable()
 export class UserService {

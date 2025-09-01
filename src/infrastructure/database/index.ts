@@ -13,6 +13,9 @@ export * from "./utils";
 // Repository exports
 export * from "./repositories";
 
-// Connection and container exports
+// Connection exports
 export * from "./connection";
-export * from "./container";
+
+// DI exports
+export * from "../di/container";
+export * from "../di/database.container";

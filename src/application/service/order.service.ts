@@ -7,6 +7,7 @@ import type { QueryOptions } from "../../infrastructure/database/middlewares/que
 import { injectable, inject } from "tsyringe";
 import { OrderRepository } from "../../infrastructure/database/repositories/OrderRepository";
 import { UserRepository } from "../../infrastructure/database/repositories/UserRepository";
+import type { PaginatedResponse, OrderWithUserDetails, BaseOrder } from "../../domain/types";
 
 @injectable()
 export class OrderService {
@@ -40,8 +41,12 @@ export class OrderService {
     return order;
   }
 
-  async getOrdersWithPagination(options: QueryOptions): Promise<any> {
-    return await this.orderRepository.findWithPagination(options);
+  async getOrdersWithPagination(options: QueryOptions): Promise<PaginatedResponse<OrderWithUserDetails>> {
+    return await this.orderRepository.findOrdersWithUserDetails(options);
+  }
+
+  async getUserOrdersWithPagination(userId: string, options: QueryOptions): Promise<PaginatedResponse<BaseOrder>> {
+    return await this.orderRepository.findUserOrdersWithPagination(userId, options);
   }
 
   async confirmOrder(id: string): Promise<OrderEntity> {

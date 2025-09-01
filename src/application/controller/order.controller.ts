@@ -52,6 +52,22 @@ export class OrderController {
     return c.json({ orders });
   }
 
+  async getUserOrdersWithPagination(c: Context) {
+    const userId = c.req.param("userId");
+    
+    // Get query options from middleware (set by queryParser)
+    const queryOptions = c.get("queryOptions") as QueryOptions;
+    
+    if (!queryOptions) {
+      throw new AppError("Query options not found. Make sure queryParser middleware is configured.", 500);
+    }
+    
+    // Get paginated results for specific user using the new query engine
+    const result = await this.orderService.getUserOrdersWithPagination(userId, queryOptions);
+    
+    return c.json(result);
+  }
+
   async getOrderWithDiscount(c: Context) {
     const id = c.req.param("id");
     const result = await this.orderService.getOrderWithDiscount(id);
