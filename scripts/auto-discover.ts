@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-console.log('🚀 Starting auto-discovery in Docker...');
+console.log('🚀 Starting auto-discovery...');
 
 // Define all the classes we know about (only actual classes, not interfaces)
 const classes = [
@@ -18,9 +18,7 @@ const classes = [
   { name: 'UserRepository', file: 'infrastructure/database/repositories/UserRepository.ts', layer: 'infrastructure', type: 'repository' },
   { name: 'OrderRepository', file: 'infrastructure/database/repositories/OrderRepository.ts', layer: 'infrastructure', type: 'repository' },
   
-  // Domain Layer (only actual classes, not interfaces)
-  { name: 'UserEntity', file: 'domain/entities/user.ts', layer: 'domain', type: 'entity' },
-  { name: 'OrderEntity', file: 'domain/entities/order.ts', layer: 'domain', type: 'entity' },
+  // Domain Layer: entities/VOs are excluded from DI by design
 ];
 
 console.log(`📦 Found ${classes.length} classes to register`);
